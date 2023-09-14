@@ -58,7 +58,7 @@ jobs:
       - name: Restore inprogress work
         uses: actions/download-artifact@v3
         with:
-          name: ingprogress
+          name: inprogress
 
       - name: Continue the Big Step
         id: bigstep
