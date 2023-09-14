@@ -32,7 +32,7 @@ jobs:
           echo "Success we are done!"
 
       - name: Saving work.
-        if: steps.build.outputs.done == 'false'
+        if: steps.bigstep.outputs.done == 'false'
         uses: actions/upload-artifact@v3
         with:
           name: inprogress
@@ -73,7 +73,7 @@ jobs:
           echo "Success we are done!"
 
       - name: Failure!
-        if: steps.build.outputs.done == 'false'
+        if: steps.bigstep.outputs.done == 'false'
         run: |
           echo "Giving up!"
           exit 1
