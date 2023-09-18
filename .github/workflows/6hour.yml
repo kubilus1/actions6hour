@@ -1,0 +1,78 @@
+name: Demo jobs continuing beyond 6 hours
+
+on:
+  workflow_dispatch:
+
+jobs:
+  try1:
+    runs-on: ubuntu-latest
+
+    outputs:
+      done: ${{ steps.bigstep.outputs.done }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout/@v3
+
+      - name: Setup
+        run: |
+          echo "Setting up some things!"
+
+      - name: A Big Step
+        id: bigstep
+        run: |
+          echo "This is a long running step in this job"
+          timeout 300m sleep 7h && echo "done=true" >> "$GITHUB_OUTPUT" || echo "done=false" >> "$GITHUB_OUTPUT"
+          echo "Try1 " > ./work
+
+      - name: Success!
+        if: steps.bigstep.outputs.done == 'true'
+        run: |
+          echo "Success we are done!"
+
+      - name: Saving work.
+        if: steps.bigstep.outputs.done == 'false'
+        uses: actions/upload-artifact@v3
+        with:
+          name: inprogress
+          path: ./work
+          retention-days: 2
+
+  try2:
+    if: needs.try1.outputs.done == 'false'
+    needs: try1
+    runs-on: ubuntu-latest
+
+    outputs:
+      done: ${{ steps.bigstep.outputs.done }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout/@v3
+
+      - name: Setup
+        run: |
+          echo "Setting up some things!"
+
+      - name: Restore inprogress work
+        uses: actions/download-artifact@v3
+        with:
+          name: inprogress
+
+      - name: Continue the Big Step
+        id: bigstep
+        run: |
+          echo "This is a long running step in this job"
+          timeout 300m sleep 90 && echo "done=true" >> "$GITHUB_OUTPUT" || echo "done=false" >> "$GITHUB_OUTPUT"
+          echo "Try2 " >> ./work
+
+      - name: Success!
+        if: steps.bigstep.outputs.done == 'true'
+        run: |
+          echo "Success we are done!"
+
+      - name: Failure!
+        if: steps.bigstep.outputs.done == 'false'
+        run: |
+          echo "Giving up!"
+          exit 1
