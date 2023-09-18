@@ -2,7 +2,6 @@ name: Demo jobs continuing beyond 6 hours
 
 on:
   workflow_dispatch:
-  pull_request:
 
 jobs:
   try1:
@@ -23,7 +22,7 @@ jobs:
         id: bigstep
         run: |
           echo "This is a long running step in this job"
-          timeout 5m sleep 7h && echo "done=true" >> "$GITHUB_OUTPUT" || echo "done=false" >> "$GITHUB_OUTPUT"
+          timeout 300m sleep 7h && echo "done=true" >> "$GITHUB_OUTPUT" || echo "done=false" >> "$GITHUB_OUTPUT"
           echo "Try1 " > ./work
 
       - name: Success!
